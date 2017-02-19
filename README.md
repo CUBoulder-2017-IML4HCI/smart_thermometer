@@ -1,6 +1,8 @@
 # smart_thermometer
 Third Assignment for IML4HCI
 
+source code: https://github.com/CUBoulder-2017-IML4HCI/smart_thermometer.git
+
 This is a simple smart themometer that we are going to modify with a waterproof temperature sensor so we can help people only drink their drinks when they are the right temperature. The entire system uses an arduino so without tht it will be hard to replicate. I use the Standard Firmata on the ardunio and then processing to complete the communication over osc with wekinator. The arduino is communicating to the processing program via the serial port. The brief schematic for connecting the board is as follows
 
 Blue LED: Digital Pin 5
