@@ -36,17 +36,25 @@ boolean initial_press = true;
 
 //raw reading variable
 int tempVal;
+//voltage variable
+float volts;
+
+//final temperature variables
+float tempC;
+float tempF;
 
 int currentClass = 1;
 
-int currentHue = 100;
+int r = 0;
+int g = 255;
+int b = 0;
 
 
 void setup() {
   //size(470, 280);
   size(400,400);
   frameRate(25);
-  background(255);
+  background(r,g,b);
 
   // Prints out the available serial ports.
   printArray(Arduino.list());
@@ -84,7 +92,7 @@ void createControls() {
 
 void draw()
 {
-  background(currentHue);
+  background(r,g,b);
  int buttonState = arduino.digitalRead(buttonPin);
  //println(buttonState);
  if(buttonState == Arduino.LOW){
@@ -121,14 +129,28 @@ void draw()
   initial_press = true;
    
  }
- tempVal = arduino.analogRead(tempPin);
- OscMessage msg = new OscMessage("/wek/inputs");
-  msg.add(tempVal); 
+   tempVal = arduino.analogRead(tempPin);
+   volts = tempVal * 3.3;
+   volts /= 1023.0;
+
+
+   //calculate temperature celsius from voltage
+   //equation found on the sensor spec.
+   tempC = (volts - 0.5) * 100 ;
+
+   // Convert from celcius to fahrenheit
+   tempF = (tempC * 9.0 / 5.0) + 32.0;
+
+  
+  //println(tempF);
+  OscMessage msg = new OscMessage("/wek/inputs");
+  msg.add(tempF); 
   //println(msg);
   oscP5.send(msg, dest);
- 
- 
 }
+ 
+ 
+
 
 void keyPressed() {
   int keyIndex = -1;
@@ -147,8 +169,8 @@ void sendOsc(float hr) {
 //This is called automatically when OSC message is received
 void oscEvent(OscMessage theOscMessage) {
  println(theOscMessage);
- println(theOscMessage.get(0).floatValue());
- println(theOscMessage.get(1).floatValue());
+ 
+ 
  
  
   if (theOscMessage.checkAddrPattern("/wek/outputs") == true) {
@@ -157,24 +179,28 @@ void oscEvent(OscMessage theOscMessage) {
       colorLight((int)f);
       
     }
-    if(theOscMessage.checkTypetag("ff")) {
+    else if(theOscMessage.checkTypetag("ff")) {
       float f1 = theOscMessage.get(0).floatValue();
       float f2 = theOscMessage.get(1).floatValue();
       if (f1<f2) {
         print("here1");
-       currentHue = 0;
+        r = 0;
+        g = 0;
+        b = 255;
       }
       else {
         print("here2");
-        currentHue = 200;
+        r = 255;
+        g = 0;
+        b = 0;
       }
-      
-      
+    }
+    else {
+      println("unknown message");
     }
   }
-  
 }
-
+      
 void colorLight(int c){
   if(c==1) {
     arduino.digitalWrite(blueLED,1);
